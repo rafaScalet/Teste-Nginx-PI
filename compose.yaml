@@ -1,21 +1,25 @@
 services:
   nginx:
-    image: nginx:1.15-alpine
+    image: nginx:alpine
+    container_name: nginx
     restart: unless-stopped
-    volumes:
-      - ./data/nginx:/etc/nginx/conf.d
-      - ./data/certbot/conf:/etc/letsencrypt
-      - ./data/certbot/www:/var/www/certbot
     ports:
       - 80:80
       - 443:443
-    command: '/bin/sh -c ''while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g "daemon off;"'''
+    volumes:
+      - certbot_conf:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
   certbot:
     image: redxef/certbot-duckdns
+    container_name: certbot
     restart: unless-stopped
     environment:
       DUCKDNS_DOMAIN: ${DUCKDNS_DOMAIN}
       DUCKDNS_TOKEN: ${DUCKDNS_TOKEN}
     volumes:
-      - ./data/certbot/conf:/etc/letsencrypt
-      - ./data/certbot/www:/var/www/certbot
+      - certbot_conf:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
+
+volumes:
+  certbot_conf:
+  certbot_www:
